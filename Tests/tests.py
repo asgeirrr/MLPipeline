@@ -22,6 +22,8 @@ class ExceptionTestCase(unittest.TestCase):
         self.inputs = self.pipeline['pipeline']['inputs']
         self.builder = Builder()
 
+    """Pipeline construction is thoroughly tested but the rest of the code isn't.
+    """
     def test_pipeline_key_missing(self):
         self.pipeline.pop('pipeline')
         self.builder.parsed_yaml = self.pipeline

@@ -9,9 +9,21 @@ from MLPipeline.utils import is_subset_of, list_of_dicts_to_dict
 class PipelineParsingError(Exception):
 
     def __init__(self, message: str):
+        """No need to override __init__ when it's not doing anything different than
+        Exception.__init__.
+        """
         super().__init__(message)
 
-
+"""
+The existence of this class seems unjustified.
+    1. The individual steps are always run together. A function
+       `build_pipeline(parsed_yaml, command_line_inputs)` would be enough.
+       Using a class instead of a function unnecessarily adds complexity.
+    2. It binds together parsing of the yaml with pipeline construction which imho violates
+       separation of concerns and makes the code less re-usable. In future, we could get
+       pipeline definitions from a different source, for instance from an API, and this class
+       could not be reused as is.
+"""
 class Builder:
     """Class for instantiating the pipeline:
 
@@ -47,6 +59,12 @@ class Builder:
         """
 
         if verbose:
+            """You're basically doing an ad-hoc re-implementation of log levels here. If you did
+            logging.debug("Building pipeline...") you could control the verbosity in one place
+            by setting a log level (possibly passed from the command line with the traditional -v
+            switch). Plus the CLI is quite talkative by default violating the good-old Unix rule
+            that silence is gold.
+            """
             print("Building pipeline...")
 
         # check of the base level definition
@@ -65,6 +83,14 @@ class Builder:
         ):
             raise PipelineParsingError("Pipeline missing key attributes.")
 
+        """This function is quite complex and pipeline initialization is scattered around.
+        Personally, I'd split it to separate steps
+            1. parse components (this would be a good candidate for a separate function)
+            2. parse inputs and outputs
+            3. initialize pipeline in one go with all the needed arguments.
+        That way you could use Pipeline.__init__ to validate for free it has all the needed
+        attributes.
+        """
         pipeline = Pipeline(pipeline_content['name'])
         # now we have the pipeline lets start to feed it
         task_factory_instance = TaskFactory()

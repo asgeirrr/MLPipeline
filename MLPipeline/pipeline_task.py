@@ -61,6 +61,12 @@ class AbstractTask:
         print(f'Ending execution of  {self.name}')
 
 
+"""Similar concern as in the Builder class. Since we're in Python and not in Java where everything
+has to be a class, I'd say that `known_runners` (possibly a simple hand-written dict instead of
+using `inspect` since we have only 3 runners) could be a module-level constant in
+`pipeline_runners.py` and `spawn_task` could be a simple function.
+Creating tasks would be a bit simpler without the need to instantiate the factory.
+"""
 class TaskFactory:
     """factory for runners"""
 
@@ -73,7 +79,7 @@ class TaskFactory:
             if issubclass(runner_class, AbstractTask):
                 self.known_runners[runner_name] = runner_class
 
-    def spawn_task(self, name: str, runner_class: str, inputs: str, outputs: str) -> AbstractTask:
+    def spawn_task(self, name: str, runner: str, inputs: str, outputs: str) -> AbstractTask:
         """
         :param name: name for new runner
         :param runner_class: name of runner class
@@ -81,9 +87,9 @@ class TaskFactory:
         :param outputs: list of output names
         :return: instance of runner
         """
-        if runner_class not in self.known_runners:
-            raise UnknownRunnerError(runner_class)
-        return self.known_runners[runner_class](name, inputs, outputs)
+        if runner not in self.known_runners:
+            raise UnknownRunnerError(runner)
+        return self.known_runners[runner](name, inputs, outputs)
 
 
 class DuplicateConsumableException(Exception):

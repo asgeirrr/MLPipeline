@@ -2,7 +2,9 @@ import asyncio
 from collections import Counter
 from typing import List
 
-
+"""This is a complicated and expensive re-implementation of the issubset operator available on sets.
+set(is_this).issubset(is_that).
+"""
 def is_subset_of(is_this: list, in_that: list) -> bool:
     """checks if this is subset of that for lists"""
     count_in_this = Counter(is_this)

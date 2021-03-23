@@ -23,6 +23,8 @@ class PipelineStuckError(Exception):
 
 class Pipeline:
 
+    """You could use dataclasses to reduce these boilerplate inits. Applies to several places.
+    """
     def __init__(self, name):
         self.name = name
         self.tasks_to_run = {}
@@ -82,6 +84,11 @@ class Pipeline:
 
         return True
 
+    """This parallelism works but it's very fragile. You're running this method in another thread
+    without any error propagations. If there is an exception, the loop in run() will run
+    indefinitely since there will be some tasks in self.tasks_running. ML models are usually complex
+    and a plethora of exceptions can occur, it should be somehow handled.
+    """
     @fire_and_forget
     def handle_task(self, task: AbstractTask) -> None:
         """async task launcher, for simplified version look at async_pipeline_principle.py file"""
@@ -94,6 +101,8 @@ class Pipeline:
         self.tasks_finished.append(self.tasks_running.pop(task.name))
         print(f"Task {task.name} finished...")
 
+    """fake_run() shares a lot of code with this method. It would be nice to deduplicate it to
+    remain maintainable."""
     def run(self) -> bool:
         """async pipeline runner, for simplified version look at async_pipeline_principle.py file"""
         print("Starting async run...")
@@ -148,3 +157,11 @@ class Pipeline:
         #     print(f"{consumable.full_name}:{consumable.content}")
 
         return True
+
+    @property
+    def results(self):
+        """cli did not present the results in any way so I've added this property.
+        """
+        return {f"{consumable.full_name}": f"{consumable.content}"
+                for consumable in self.consumables
+                if consumable.name in self.expected_outputs}

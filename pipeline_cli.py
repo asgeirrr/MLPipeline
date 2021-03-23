@@ -38,3 +38,4 @@ if __name__ == '__main__':
     if fake_result:
         pipe = site.build_pipeline(args['bad_yaml'])
         pipe.run()
+    print(pipe.results)
